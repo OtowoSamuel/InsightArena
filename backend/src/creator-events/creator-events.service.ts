@@ -126,7 +126,7 @@ export class CreatorEventsService {
       where: { event_id: eventId },
       select: ['user_address'],
     });
-    const winnerAddresses = new Set(winners.map((w) => w.user_address));
+    const winnerAddresses = new Set((winners ?? []).map((w) => w.user_address));
 
     const data: LeaderboardEntryResponse[] = typedResults.map((row, index) => {
       const totalPredictions = Number(row.total_predictions);

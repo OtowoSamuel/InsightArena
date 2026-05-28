@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-floating-promises */
-
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -12,12 +11,10 @@ import {
   Request,
   UseGuards,
   UseInterceptors,
-  Response as ExpressResponse,
+  Res,
 } from '@nestjs/common';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-
-type RequestUser = Request & { user: { id: string } };
+import type { Response } from 'express';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -34,6 +31,8 @@ import { ReportQueryDto, ReportFormat } from './dto/report-query.dto';
 import { ResolveMarketDto } from './dto/resolve-market.dto';
 import { StatsResponseDto } from './dto/stats-response.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+
+type RequestUser = Request & { user: { id: string } };
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -196,7 +195,7 @@ export class AdminController {
   @ApiResponse({ status: 400, description: 'Invalid date range' })
   async getActivityReport(
     @Query() query: ReportQueryDto,
-    @ExpressResponse() res: Response,
+    @Res() res: Response,
   ): Promise<void> {
     const result = await this.adminService.getActivityReport(query);
 
