@@ -126,32 +126,30 @@ export class AdminService {
     };
   }
 
-  async getFeeStats(query: DateRangeQueryDto): Promise<FeeStatsResponseDto> {
+  async getFeeStats(range: DateRangeQueryDto): Promise<FeeStatsResponseDto> {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
 
-    const eventQb = this.creatorEventRepository
-      .createQueryBuilder('event');
-    const countQb = this.creatorEventRepository
-      .createQueryBuilder('event');
+    const eventQb = this.creatorEventRepository.createQueryBuilder('event');
+    const countQb = this.creatorEventRepository.createQueryBuilder('event');
 
-    if (query.start_date) {
+    if (range.start_date) {
       eventQb.andWhere('event.on_chain_created_at >= :startDate', {
-        startDate: new Date(query.start_date),
+        startDate: new Date(range.start_date),
       });
       countQb.andWhere('event.on_chain_created_at >= :startDate', {
-        startDate: new Date(query.start_date),
+        startDate: new Date(range.start_date),
       });
     }
-    if (query.end_date) {
+    if (range.end_date) {
       eventQb.andWhere('event.on_chain_created_at <= :endDate', {
-        endDate: new Date(query.end_date),
+        endDate: new Date(range.end_date),
       });
       countQb.andWhere('event.on_chain_created_at <= :endDate', {
-        endDate: new Date(query.end_date),
+        endDate: new Date(range.end_date),
       });
     }
 

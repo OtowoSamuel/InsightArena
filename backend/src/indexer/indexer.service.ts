@@ -490,7 +490,7 @@ export class IndexerService implements OnModuleInit {
         await this.handleMatchResultSubmitted(data);
         break;
       case 'WinnersVerified':
-        await this.handleWinnersVerified(data);
+        this.handleWinnersVerified(data);
         break;
       case 'EventCancelled':
         await this.handleEventCancelled(data);
@@ -964,10 +964,20 @@ export class IndexerService implements OnModuleInit {
 
   private readStr(data: Record<string, unknown>, key: string): string {
     const val = data[key];
+    if (val === null || val === undefined) return '';
     if (typeof val === 'string') return val;
     if (typeof val === 'number' || typeof val === 'boolean') return String(val);
-    if (val === null || val === undefined) return '';
-    return JSON.stringify(val);
+    if (typeof val === 'object') {
+      try {
+        return JSON.stringify(val);
+      } catch {
+        return '';
+      }
+    }
+    if (typeof val === 'symbol' || typeof val === 'bigint') {
+      return String(val);
+    }
+    return '';
   }
 
   private readNum(data: Record<string, unknown>, key: string): number | null {
