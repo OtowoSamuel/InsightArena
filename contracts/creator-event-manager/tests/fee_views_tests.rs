@@ -1,9 +1,8 @@
 use creator_event_manager::CreatorEventManagerContractClient;
 use soroban_sdk::testutils::Address as _;
-use soroban_sdk::testutils::Ledger as _;
 use soroban_sdk::token::Client as TokenClient;
 use soroban_sdk::token::StellarAssetClient;
-use soroban_sdk::{Address, Env, String, Symbol};
+use soroban_sdk::{Address, Env, String};
 
 const FEE: i128 = 1_000_000;
 
@@ -52,21 +51,20 @@ fn test_treasury_balance_and_withdraw_success() {
 
     let admin = Address::generate(&env);
     let ai_agent = Address::generate(&env);
-    // Use the contract address as treasury so the contract holds fees.
-    let treasury = contract_id.clone();
+    let treasury = Address::generate(&env);
     let token_admin = Address::generate(&env);
     let xlm_token = env.register_stellar_asset_contract_v2(token_admin).address();
 
     client.initialize(&admin, &ai_agent, &treasury, &xlm_token, &FEE);
 
-    // Create an event which moves the fee to the treasury (the contract).
+    // Create an event which moves the fee to the treasury address.
     let creator = Address::generate(&env);
     // fund creator
     StellarAssetClient::new(&env, &xlm_token).mint(&creator, &FEE);
 
     let (_event_id, _invite_code) = client.create_event(&creator, &title(&env), &desc(&env), &2u32);
 
-    // Treasury (contract) should now have the fee
+    // Treasury address should now have the fee
     let bal = client.get_treasury_balance();
     assert_eq!(bal, FEE);
 
@@ -96,7 +94,7 @@ fn test_withdraw_non_admin_rejected() {
 
     let admin = Address::generate(&env);
     let ai_agent = Address::generate(&env);
-    let treasury = contract_id.clone();
+    let treasury = Address::generate(&env);
     let token_admin = Address::generate(&env);
     let xlm_token = env.register_stellar_asset_contract_v2(token_admin).address();
 
@@ -124,7 +122,7 @@ fn test_withdraw_insufficient_balance_rejected() {
 
     let admin = Address::generate(&env);
     let ai_agent = Address::generate(&env);
-    let treasury = contract_id.clone();
+    let treasury = Address::generate(&env);
     let token_admin = Address::generate(&env);
     let xlm_token = env.register_stellar_asset_contract_v2(token_admin).address();
 
@@ -147,7 +145,7 @@ fn test_withdraw_zero_amount_rejected() {
 
     let admin = Address::generate(&env);
     let ai_agent = Address::generate(&env);
-    let treasury = contract_id.clone();
+    let treasury = Address::generate(&env);
     let token_admin = Address::generate(&env);
     let xlm_token = env.register_stellar_asset_contract_v2(token_admin).address();
 

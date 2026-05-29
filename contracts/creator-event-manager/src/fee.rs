@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, token::Client as TokenClient};
+use soroban_sdk::{Address, Env};
 
 use crate::admin;
 use crate::storage_types::DataKey;
@@ -58,17 +58,12 @@ pub fn withdraw_fees(env: &Env, caller: Address, to: Address, amount: i128) -> R
         return Err(FeeError::InsufficientBalance);
     }
 
-    // If the treasury equals the contract, perform a contract-send transfer.
-    let contract = env.current_contract_address();
-    if treasury == contract {
-        TokenHelper::transfer(env, &xlm_token, &to, amount)
-            .map_err(|_| FeeError::TransferFailed)?;
-        return Ok(());
-    }
-
-    // Otherwise attempt a direct token transfer from the treasury to `to`.
-    let client = TokenClient::new(env, &xlm_token);
-    client.transfer(&treasury, &to, &amount);
+    TokenHelper::transfer_from(env, &xlm_token, &treasury, &to, amount)
+        .map_err(|err| match err {
+            crate::token::TokenError::InsufficientBalance => FeeError::InsufficientBalance,
+            crate::token::TokenError::TransferFailed => FeeError::TransferFailed,
+            _ => FeeError::TransferFailed,
+        })?;
 
     Ok(())
 }
